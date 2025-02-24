@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cipher - Cryptography Challenge</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #00ff9d;
+            --error: #ff4757;
+            --success: #2ed573;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-button.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            color: var(--text-primary);
+            border-radius: 5px;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        input::placeholder {
+            text-transform: uppercase;
+            font-weight: normal;
+            opacity: 0.5;
+            letter-spacing: normal;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-primary);
+            border-radius: 5px;
+            min-height: 120px;
+            perspective: 1000px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .message-display {
+            font-size: min(3rem, 8vw);
+            letter-spacing: 4px;
+            text-align: center;
+            min-height: 4rem;
+            padding: 1rem;
+            word-break: break-word;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .message-display:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .message-display::after {
+            content: 'Click to copy';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-display:hover::after {
+            opacity: 1;
+        }
+
+        .message-display.copied::after {
+            content: 'Copied!';
+            color: var(--accent);
+        }
+
+        .char {
+            display: inline-block;
+            min-width: 1ch;
+            transform-style: preserve-3d;
+            opacity: 1;
+        }
+
+        .char.spinning {
+            animation: spin 1.5s ease-in-out forwards;
+        }
+
+        @keyframes spin {
+            0% { 
+                transform: rotateX(0deg);
+                opacity: 0;
+            }
+            20% { 
+                transform: rotateX(720deg);
+                opacity: 1;
+            }
+            40% { 
+                transform: rotateX(1440deg);
+                opacity: 1;
+            }
+            60% { 
+                transform: rotateX(2160deg);
+                opacity: 1;
+            }
+            80% { 
+                transform: rotateX(2880deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: rotateX(3600deg);
+                opacity: 1;
+            }
+        }
+
+        .success-message {
+            color: var(--success);
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .success-message.visible {
+            opacity: 1;
+        }
+
+        .error-message {
+            color: var(--error);
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        @media (max-height: 700px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+                max-height: calc(100vh - 2rem);
+            }
+
+            h1 {
+                margin-bottom: 1rem;
+                font-size: 1.5rem;
+            }
+
+            .message-display {
+                font-size: min(2.5rem, 6vw);
+                min-height: 3rem;
+                padding: 0.5rem;
+            }
+
+            .result {
+                min-height: 100px;
+            }
+
+            .input-group {
+                margin-bottom: 0.75rem;
+            }
+
+            input, select, button {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Caesar Cipher Challenge</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="encrypt">Encrypt</button>
+            <button class="tab-button" data-tab="decrypt">Decrypt</button>
+        </div>
+
+        <div id="encrypt-panel">
+            <div class="input-group">
+                <label for="encrypt-message">Message to Encrypt:</label>
+                <input type="text" id="encrypt-message" placeholder="Enter your message" oninput="this.value = this.value.toUpperCase()">
+            </div>
+
+            <div class="input-group">
+                <label for="encrypt-key">Encryption Key (1-25):</label>
+                <input type="number" id="encrypt-key" min="1" max="25" value="3">
+            </div>
+
+            <button onclick="handleEncrypt()">Encrypt Message</button>
+
+            <div class="result">
+                <div class="message-display" id="encrypt-result"></div>
+            </div>
+        </div>
+
+        <div id="decrypt-panel" style="display: none;">
+            <div class="input-group">
+                <label for="decrypt-message">Encrypted Message:</label>
+                <input type="text" id="decrypt-message" placeholder="Enter encrypted message" oninput="this.value = this.value.toUpperCase()">
+            </div>
+
+            <div class="input-group">
+                <label for="decrypt-key">Try a Key (1-25):</label>
+                <input type="number" id="decrypt-key" min="1" max="25" value="3">
+            </div>
+
+            <button onclick="handleDecrypt()">Try Decrypt</button>
+
+            <div class="result">
+                <div class="message-display" id="decrypt-result"></div>
+                <div class="success-message" id="success-message"></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
